@@ -1,8 +1,15 @@
 library(tidyverse)
 library(fs)
 
-midterm_results <- read_csv("mt_2_results.csv")
+midterm_results <- read_csv("mt_2_results.csv") %>% 
+  filter(district != "sen",
+         district != "gov",
+         district != "AL")
 
+midterm_results$state <- tolower(midterm_results$state)
+
+results <- midterm_results %>% 
+  mutate(state_district = paste(state, district))
 
 download.file(url = "https://goo.gl/ZRCBda",
               destfile = "master.zip",
@@ -21,5 +28,21 @@ z_clean <- z_2 %>%
   select(state:COAL) %>% 
   filter(district != "sen" |
          district != "gov", 
-         round == "3.csv")
+         round == "3.csv") %>% 
+  mutate(state_district = paste(state, district))
+
+all <- full_join(results, z_clean, by= "state_district")%>% 
+  select(win_name:state_district, response:race_eth) %>% 
+  mutate(race_eth = fct_relevel(race_eth, c("Hispanic", "White", "Black", "Asian", "Other"))) %>% 
+  filter(ager != "[DO NOT READ] Don't know/Refused",
+         ager != "[DO NOT READ] Refused",
+         race_eth != "[DO NOT READ] Don't know/Refused",
+         gender != "[DO NOT READ] Don't know/Refused") %>% 
+  filter(state_district != "az sen",
+         state_district != "fl sen")
+  
+all$ager <- recode(all$ager, "18 to 34" = "18-34", "35 to 49" = "35-49", "50 to 64" = "50-64", 
+                   "65 and older" = "65+")
+
+write_rds(all, path = "ps_7/results.rds")
 
