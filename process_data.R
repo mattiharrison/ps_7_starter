@@ -45,4 +45,5 @@ all$ager <- recode(all$ager, "18 to 34" = "18-34", "35 to 49" = "35-49", "50 to 
                    "65 and older" = "65+")
 
 write_rds(all, path = "ps_7/results.rds")
+write_rds(midterm_results, path = "ps_7/upshot.rds")
 

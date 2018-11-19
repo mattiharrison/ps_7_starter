@@ -4,6 +4,7 @@ library(ggplot2)
 library(janitor)
 
 data <- read_rds("results.rds")
+midterm <- read_rds("upshot.rds")
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -17,8 +18,8 @@ ui <- fluidPage(
       selectInput(
         inputId = "characteristic",
         label = "Choose Characteristic:",
-        choices = c("Age" = "data2$ager", "Sex" = "data2$gender", "Race/Ethnicity" = "data2$race_eth"),
-        selected = "data$ager"
+        choices = c("Age" = "ager", "Sex" = "gender", "Race/Ethnicity" = "race_eth"),
+        selected = "ager"
       )),
     
     # Show a plot of the generated distribution
@@ -31,44 +32,12 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) { 
   
-  datasetInput <- reactive({
-    switch(input$data,
-           "ager" = ager,
-           "gender" = gender,
-           "race_eth" = race_eth)
-  })
-  
- 
   output$barPlot <- renderPlot({
     
     data %>%
-      ggplot(aes_string(x = "ager")) + 
+      ggplot(aes_string(x = input$characteristic)) + 
       geom_bar(aes_string(fill= input$ager)) +
-      xlab("Age") + ylab("Number of Interviewees") + 
-      ggtitle("Age, Sex, and Race/Ethnicity Breakdowns of Interview") + 
-      labs(subtitle = "Upshot data and Midterm Results") + 
-      theme_minimal() + labs(fill = "")
-  })
-  
- 
-  output$barPlot <- renderPlot({
-    
-    data %>%
-      ggplot(aes_string(x = "gender")) + 
-      geom_bar(aes_string(fill= input$gender)) +
-      xlab("Gender") + ylab("Number of Interviewees") + 
-      ggtitle("Age, Sex, and Race/Ethnicity Breakdowns of Interview") + 
-      labs(subtitle = "Upshot data and Midterm Results") + 
-      theme_minimal() + labs(fill = "")
-  })
-
-  
-  output$barPlot <- renderPlot({
-    
-    data %>%
-      ggplot(aes_string(x = "race_eth")) + 
-      geom_bar(aes_string(fill= input$race_eth)) +
-      xlab("Race/Ethnicity") + ylab("Number of Interviewees") + 
+      xlab(input$characteristic) + ylab("Number of Interviewees") + 
       ggtitle("Age, Sex, and Race/Ethnicity Breakdowns of Interview") + 
       labs(subtitle = "Upshot data and Midterm Results") + 
       theme_minimal() + labs(fill = "")
