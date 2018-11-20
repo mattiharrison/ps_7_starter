@@ -4,12 +4,19 @@ library(fs)
 midterm_results <- read_csv("mt_2_results.csv") %>% 
   filter(district != "sen",
          district != "gov",
-         district != "AL")
+         district != "AL") %>% 
+  mutate(total = dem_votes + rep_votes + other_votes) %>% 
+  filter(total != 0)
 
 midterm_results$state <- tolower(midterm_results$state)
 
 results <- midterm_results %>% 
   mutate(state_district = paste(state, district))
+
+specific_results <- results %>% 
+  filter(state_district == "nj 03" | 
+         state_district == "az 06" | 
+         state_district == "ms 04")
 
 download.file(url = "https://goo.gl/ZRCBda",
               destfile = "master.zip",
@@ -31,6 +38,11 @@ z_clean <- z_2 %>%
          round == "3.csv") %>% 
   mutate(state_district = paste(state, district))
 
+specific_clean <- z_clean %>% 
+  filter(state_district == "nj 03" | 
+         state_district == "az 06"| 
+         state_district == "ms 04")
+
 all <- full_join(results, z_clean, by= "state_district")%>% 
   select(win_name:state_district, response:race_eth) %>% 
   mutate(race_eth = fct_relevel(race_eth, c("Hispanic", "White", "Black", "Asian", "Other"))) %>% 
@@ -44,6 +56,14 @@ all <- full_join(results, z_clean, by= "state_district")%>%
 all$ager <- recode(all$ager, "18 to 34" = "18-34", "35 to 49" = "35-49", "50 to 64" = "50-64", 
                    "65 and older" = "65+")
 
+specific <- full_join(specific_results, specific_clean, by = "state_district") %>% 
+  select(win_name:state_district, response:race_eth) %>% 
+  mutate(race_eth = fct_relevel(race_eth, c("Hispanic", "White", "Black", "Asian", "Other"))) %>% 
+  filter(ager != "[DO NOT READ] Don't know/Refused",
+         ager != "[DO NOT READ] Refused",
+         race_eth != "[DO NOT READ] Don't know/Refused",
+         gender != "[DO NOT READ] Don't know/Refused")
+
 write_rds(all, path = "ps_7/results.rds")
-write_rds(midterm_results, path = "ps_7/upshot.rds")
+write_rds(specific, path = "ps_7/upshot.rds")
 
