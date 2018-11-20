@@ -9,7 +9,6 @@ library(plotly)
 library(scales)
 
 data <- read_rds("results.rds")
-specific <- read_rds("upshot.rds")
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -31,6 +30,7 @@ ui <- fluidPage(
     mainPanel(
       
       tabsetPanel(type = "tabs",
+                  tabPanel("About this app", htmlOutput("about")),
                   tabPanel("barplot1", plotlyOutput("barPlot1")),
                   tabPanel("barplot2", plotOutput("barPlot2")))
       )))
@@ -42,7 +42,7 @@ server <- function(input, output) {
   output$barPlot1 <- renderPlotly({
     data %>%
       ggplot(aes_string(x = input$characteristic)) + 
-      geom_bar(aes_string(fill= input$ager)) +
+      geom_bar() +
       xlab(input$characteristic) + ylab("Number of Interviewees") + 
       ggtitle("Age and Ethnicity Breakdowns of Interview") + 
       labs(subtitle = "Upshot data and Midterm Results") + 
@@ -50,13 +50,27 @@ server <- function(input, output) {
   })
   
   output$barPlot2 <- renderPlotly({
-      ggplot(data = specific, aes_string(x = "state_district")) +
-      geom_bar(aes(fill = input$characteristic), width = .1) + 
+    specific %>% 
+      ggplot(aes_string(x = input$characteristic)) +
+      geom_point(aes(fill = input$characteristic), stat="count") + 
       labs(title = "Histogram of States Voting Distribution")
     
   })
   
+  output$about <- renderUI({
+    
+    # Provide users with a summary of the application and instructions
+    # Provide users with information on the data source
+    
+    str1 <- paste("Summary")
+    str2 <- paste("This app shows the interviewees that Upshot used in their poll.")
+    str3 <- paste("Instructions") 
+    str4 <- paste("Click through the tabs to see the data in different ways and use the drop-down menu to go between different characteristics.")
+   
+    HTML(paste(h3(str1), p(str2), h3(str3), p(str4)))})
+  
 }
+
 
 # Run the application 
 shinyApp(ui = ui, server = server)
