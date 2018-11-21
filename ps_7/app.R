@@ -35,15 +35,15 @@ ui <- fluidPage(
       
       tabsetPanel(type = "tabs",
                   tabPanel("About this app", htmlOutput("about")),
-                  tabPanel("barplot1", plotlyOutput("barPlot1")),
-                  tabPanel("barplot2", plotOutput("barPlot2")))
+                  tabPanel("barplot", plotlyOutput("barPlot")),
+                  tabPanel("piechart", plotOutput("piechart")))
       )))
   
 
 # Define server logic required to draw a histogram
 server <- function(input, output) { 
   
-  output$barPlot1 <- renderPlotly({
+  output$barPlot <- renderPlotly({
     data %>%
       ggplot(aes_string(x = input$characteristic)) + 
       geom_bar() +
@@ -53,7 +53,7 @@ server <- function(input, output) {
       theme_minimal() + labs(fill = "")
   })
   
-  output$barPlot2 <- renderPlot({
+  output$piechart <- renderPlot({
     specific %>% 
     ggplot(aes(x = "", fill = input$characteristic)) +
       geom_bar(width = 1) + coord_polar(theta = "y" , start=0)})
