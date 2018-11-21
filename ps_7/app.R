@@ -10,6 +10,10 @@ library(scales)
 
 data <- read_rds("results.rds")
 
+specific <- data %>% 
+  filter(state_district == "az 06"|
+         state_district == "nj 03")
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   
@@ -49,13 +53,10 @@ server <- function(input, output) {
       theme_minimal() + labs(fill = "")
   })
   
-  output$barPlot2 <- renderPlotly({
+  output$barPlot2 <- renderPlot({
     specific %>% 
-      ggplot(aes_string(x = input$characteristic)) +
-      geom_point(aes(fill = input$characteristic), stat="count") + 
-      labs(title = "Histogram of States Voting Distribution")
-    
-  })
+    ggplot(aes(x = "", fill = input$characteristic)) +
+      geom_bar(width = 1) + coord_polar(theta = "y" , start=0)})
   
   output$about <- renderUI({
     
@@ -70,7 +71,6 @@ server <- function(input, output) {
     HTML(paste(h3(str1), p(str2), h3(str3), p(str4)))})
   
 }
-
 
 # Run the application 
 shinyApp(ui = ui, server = server)
